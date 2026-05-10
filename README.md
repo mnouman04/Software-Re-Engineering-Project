@@ -32,6 +32,59 @@ Solves the day-to-day pain of paper-based OPD record keeping. The legacy flow ov
 
 ---
 
+## Commands (SonarQube, DB schema, ETL)
+
+### Start SonarQube
+
+Option A: Docker (recommended)
+
+```bash
+docker run --name sonarqube -p 9000:9000 sonarqube:lts-community
+```
+
+Option B: Local SonarQube zip install (Windows)
+
+```bat
+cd C:\path\to\sonarqube
+.\bin\windows-x86-64\StartSonar.bat
+```
+
+### Run SonarScanner
+
+This project uses [RE_Final/src/main/java/org/example/sonar-project.properties](RE_Final/src/main/java/org/example/sonar-project.properties). Use a SonarQube token and run the scanner from the repository root.
+
+```bat
+set SONAR_TOKEN=your_token_here
+sonar-scanner -Dproject.settings=RE_Final/src/main/java/org/example/sonar-project.properties -Dsonar.login=%SONAR_TOKEN%
+```
+
+### Load the hospital schema
+
+The schema and table dumps are stored in [databaseFiles and demoLoginCredentials/hospitaldb](databaseFiles%20and%20demoLoginCredentials/hospitaldb).
+
+```bat
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS hospital;"
+mysql -u root -p hospital < "databaseFiles and demoLoginCredentials/hospitaldb/hospital_login.sql"
+mysql -u root -p hospital < "databaseFiles and demoLoginCredentials/hospitaldb/hospital_employee.sql"
+mysql -u root -p hospital < "databaseFiles and demoLoginCredentials/hospitaldb/hospital_patient.sql"
+mysql -u root -p hospital < "databaseFiles and demoLoginCredentials/hospitaldb/hospital_idgenerate.sql"
+mysql -u root -p hospital < "databaseFiles and demoLoginCredentials/hospitaldb/hospital_opd.sql"
+mysql -u root -p hospital < "databaseFiles and demoLoginCredentials/hospitaldb/hospital_opddetails.sql"
+mysql -u root -p hospital < "databaseFiles and demoLoginCredentials/hospitaldb/hospital_routines.sql"
+```
+
+Manual seed steps (admin login, idgenerate row) are listed in [databaseFiles and demoLoginCredentials/tableQueries_SetupGuide.txt](databaseFiles%20and%20demoLoginCredentials/tableQueries_SetupGuide.txt).
+
+### Execute the ETL migration script
+
+The ETL uses [ETLPipeline/etl_migration.py](ETLPipeline/etl_migration.py) and expects a legacy appointments CSV in the same folder.
+
+```bat
+python ETLPipeline\etl_migration.py
+```
+
+---
+
 ## Documentation map (part-wise)
 
 ### Part A: Code smell analysis and audits
